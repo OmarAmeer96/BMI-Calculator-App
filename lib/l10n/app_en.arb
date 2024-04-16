@@ -15,5 +15,5 @@
     "conditionThree": "Overweight",
     "conditionFour": "Obese (Moderate)",
     "conditionFive": "Obese (Severe)",
-    "conditionSix": "Obese (Very severe or morbid)"
+    "conditionSix": "not entering a valid data"
 }

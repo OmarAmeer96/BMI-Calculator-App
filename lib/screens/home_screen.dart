@@ -1,10 +1,11 @@
+import 'package:bmi_app/core/functions/get_bmi_status.dart';
+import 'package:bmi_app/widgets/gender_container.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bmi_app/Language_cubit/cubit/language_cubit.dart';
 import 'package:bmi_app/cubit/cubit/bmi_cubit.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:url_launcher/url_launcher_string.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,41 +22,22 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
   }
 
-  // Method to calculate BMI
   void calculateBMI() {
-    // Convert height from cm to meters
     double heightInMeters = height / 100;
-
-    // Calculate BMI using the formula: BMI = weight (kg) / (height (m) * height (m))
     double bmiResult = weight / (heightInMeters * heightInMeters);
-
-    // Update the bmi variable with the calculated value
     setState(() {
-      bmi = bmiResult;
+      if (height >= 100) {
+        bmi = bmiResult;
+      } else {
+        bmi = 0;
+      }
     });
     isBMICalculated = true;
   }
 
   bool isBMICalculated = false;
-  String getBMIStatus() {
-    if (bmi < 18.5) {
-      return AppLocalizations.of(context)!.conditionOne;
-    } else if (bmi >= 18.5 && bmi <= 24.9) {
-      return AppLocalizations.of(context)!.conditionTwo;
-    } else if (bmi >= 25 && bmi <= 29.9) {
-      return AppLocalizations.of(context)!.conditionThree;
-    } else if (bmi >= 30 && bmi <= 34.9) {
-      return AppLocalizations.of(context)!.conditionFour;
-    } else if (bmi >= 35 && bmi <= 39.9) {
-      return AppLocalizations.of(context)!.conditionFive;
-    } else if (bmi == 0) {
-      return "";
-    } else {
-      return AppLocalizations.of(context)!.conditionSix;
-    }
-  }
 
-  double height = 0;
+  double height = 150;
   int weight = 50;
   int age = 20;
   double bmi = 0;
@@ -75,18 +57,6 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: isDarkMode
             ? const Color(0xff221e1c)
             : const Color.fromARGB(255, 238, 214, 214),
-        floatingActionButton: FloatingActionButton(
-          backgroundColor: const Color(0xffae8c51),
-          onPressed: () {
-            launchUrlString(
-              "tel: +201554111002",
-            );
-          },
-          child: const Icon(
-            Icons.call,
-            size: 30,
-          ),
-        ),
         body: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -103,18 +73,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
                   return Row(
                     children: [
-                      _buildGenderContainer(
-                        AppLocalizations.of(context)!.male,
-                        Icons.male,
-                        isMaleSelected,
-                        () => context.read<BmiCubit>().selectMale(),
+                      GenderContainer(
+                        label: AppLocalizations.of(context)!.male,
+                        icon: Icons.male,
+                        isSelected: isMaleSelected,
+                        onTap: () => context.read<BmiCubit>().selectMale(),
+                        isDarkMode: isDarkMode,
                       ),
                       const SizedBox(width: 10),
-                      _buildGenderContainer(
-                        AppLocalizations.of(context)!.female,
-                        Icons.female,
-                        isFemaleSelected,
-                        () => context.read<BmiCubit>().selectFemale(),
+                      GenderContainer(
+                        label: AppLocalizations.of(context)!.female,
+                        icon: Icons.female,
+                        isSelected: isFemaleSelected,
+                        onTap: () => context.read<BmiCubit>().selectFemale(),
+                        isDarkMode: isDarkMode,
                       ),
                     ],
                   );
@@ -193,7 +165,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     child: GestureDetector(
                       onTap: () {
-                        calculateBMI(); // Call the method to calculate BMI when the button is tapped
+                        calculateBMI();
                       },
                       child: Container(
                         height: 50,
@@ -282,7 +254,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                           )
                                         : const Text(
-                                            "",
+                                            '',
                                             style: TextStyle(
                                               fontFamily: "Gilroy-Bold",
                                               color: Color(0xffA97C37),
@@ -291,7 +263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                     isBMICalculated
                                         ? Text(
-                                            getBMIStatus(),
+                                            getBMIStatus(bmi, context),
                                             style: const TextStyle(
                                               fontFamily: "Gilroy-Heavy",
                                               color: Color(0xffA97C37),
@@ -299,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             ),
                                           )
                                         : const Text(
-                                            "",
+                                            '',
                                             style: TextStyle(
                                               fontFamily: "Gilroy-Bold",
                                               color: Color(0xffA97C37),
@@ -312,59 +284,10 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         )
-                      : const Text(""),
+                      : const Text(''),
                 ],
               ),
             ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGenderContainer(
-    String label,
-    IconData icon,
-    bool isSelected,
-    VoidCallback onTap,
-  ) {
-    final backgroundColor = isSelected
-        ? const Color(0xff55433C)
-        : (isDarkMode ? const Color(0xff272220) : const Color(0xff5a5f6d));
-    final borderColor =
-        isSelected ? const Color(0xffA97C37) : Colors.transparent;
-
-    return Expanded(
-      child: GestureDetector(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(4.0),
-          child: Container(
-            height: 185,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              color: backgroundColor,
-              border: Border.all(color: borderColor),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  icon,
-                  color: const Color(0xffA97C37),
-                  size: 60,
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  label,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontFamily: "Gilroy-Bold",
-                  ),
-                ),
-              ],
-            ),
           ),
         ),
       ),
@@ -400,20 +323,6 @@ class _HomeScreenState extends State<HomeScreen> {
           },
           icon: Icon(
             Icons.language,
-            color: isDarkMode ? Colors.white : Colors.black,
-          ),
-        ),
-        IconButton(
-          onPressed: () {
-            // Web View
-            launchUrlString(
-              "https://facebook.com",
-              // I don't know what does this line do
-              mode: LaunchMode.externalNonBrowserApplication,
-            );
-          },
-          icon: Icon(
-            Icons.web,
             color: isDarkMode ? Colors.white : Colors.black,
           ),
         ),

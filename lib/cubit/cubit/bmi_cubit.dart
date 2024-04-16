@@ -13,7 +13,5 @@ class BmiCubit extends Cubit<BmiState> {
     emit(GenderSelected(isMaleSelected: false, isFemaleSelected: true));
   }
 
-  bool isDarkMode = true; // New state to track the app's mode
-
-
+  bool isDarkMode = true;
 }
